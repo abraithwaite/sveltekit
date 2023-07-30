@@ -13,7 +13,6 @@ import { fileURLToPath } from 'url';
 import { parse_route_id } from '../../../utils/routing.js';
 import { escape, extract_frontmatter, transform } from './markdown.js';
 import { replace_placeholders } from './render.js';
-// import { modules } from './type-info.js';
 
 const snippet_cache = fileURLToPath(new URL('../../../../.snippets', import.meta.url));
 if (!fs.existsSync(snippet_cache)) {
@@ -33,29 +32,6 @@ const languages = {
 };
 
 const base = './documentation';
-
-// const type_regex = new RegExp(
-// 	`(import\\(&apos;@sveltejs\\/kit&apos;\\)\\.)?\\b(${modules
-// 		.flatMap((module) => module.types)
-// 		.map((type) => type.name)
-// 		.join('|')})\\b`,
-// 	'g'
-// );
-
-// const type_links = new Map();
-
-// const slugs = {
-// 	'@sveltejs/kit': 'public-types'
-// };
-
-// modules.forEach((module) => {
-// 	const slug = slugs[module.name] || slugify(module.name);
-
-// 	module.types.forEach((type) => {
-// 		const link = `/docs/types#${slug}-${slugify(type.name)}`;
-// 		type_links.set(type.name, link);
-// 	});
-// });
 
 /** @param {string} html */
 function replace_blank_lines(html) {
@@ -285,15 +261,6 @@ export async function read_file(file) {
 			// type_regex.lastIndex = 0;
 
 			html = html
-				// .replace(type_regex, (match, prefix, name) => {
-				// 	if (options.link === 'false' || name === current) {
-				// 		// we don't want e.g. RequestHandler to link to RequestHandler
-				// 		return match;
-				// 	}
-
-				// 	const link = `<a href="${type_links.get(name)}">${name}</a>`;
-				// 	return `${prefix || ''}${link}`;
-				// })
 				.replace(
 					/^(\s+)<span class="token comment">([\s\S]+?)<\/span>\n/gm,
 					(match, intro_whitespace, content) => {
