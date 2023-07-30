@@ -1,5 +1,5 @@
 <script>
-	/** @type {string | import('vite-imagetools').Picture} */
+	/** @type {string} */
 	export let src;
 
 	/** @type {string} */

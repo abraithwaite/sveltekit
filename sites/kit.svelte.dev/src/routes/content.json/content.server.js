@@ -1,9 +1,9 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import glob from 'tiny-glob/sync.js';
 import { slugify } from '$lib/docs/server';
 import { extract_frontmatter, transform } from '$lib/docs/server/markdown.js';
 import { replace_placeholders } from '$lib/docs/server/render.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import glob from 'tiny-glob/sync.js';
 
 const categories = [
 	{
@@ -26,14 +26,14 @@ export function content() {
 	for (const category of categories) {
 		const breadcrumbs = category.label ? [category.label] : [];
 
-		for (const file of glob('**/*.md', { cwd: `../../documentation/${category.slug}` })) {
+		for (const file of glob('**/*.md', { cwd: `./documentation/${category.slug}` })) {
 			const basename = path.basename(file);
 			const match = /\d{2}-(.+)\.md/.exec(basename);
 			if (!match) continue;
 
 			const slug = match[1];
 
-			const filepath = `../../documentation/${category.slug}/${file}`;
+			const filepath = `./documentation/${category.slug}/${file}`;
 			const markdown = replace_placeholders(fs.readFileSync(filepath, 'utf-8'));
 
 			const { body, metadata } = extract_frontmatter(markdown);

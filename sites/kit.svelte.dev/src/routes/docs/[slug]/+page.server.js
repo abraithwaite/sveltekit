@@ -2,7 +2,7 @@ import fs from 'fs';
 import { read_file } from '$lib/docs/server';
 import { error } from '@sveltejs/kit';
 
-const base = '../../documentation/docs';
+const base = './documentation/docs';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ params }) {

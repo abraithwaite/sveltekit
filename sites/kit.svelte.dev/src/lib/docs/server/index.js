@@ -1,19 +1,19 @@
+import { createHash } from 'crypto';
 import * as fs from 'fs';
+import MagicString from 'magic-string';
 import * as path from 'path';
-import { renderCodeToHTML, runTwoSlash, createShikiHighlighter } from 'shiki-twoslash';
 import PrismJS from 'prismjs';
 import 'prismjs/components/prism-bash.js';
 import 'prismjs/components/prism-diff.js';
 import 'prismjs/components/prism-typescript.js';
 import 'prism-svelte';
-import { escape, extract_frontmatter, transform } from './markdown.js';
-import { modules } from './type-info.js';
-import { replace_placeholders } from './render.js';
-import { parse_route_id } from '../../../../../../packages/kit/src/utils/routing.js';
+import { createShikiHighlighter, renderCodeToHTML, runTwoSlash } from 'shiki-twoslash';
 import ts from 'typescript';
-import MagicString from 'magic-string';
 import { fileURLToPath } from 'url';
-import { createHash } from 'crypto';
+import { parse_route_id } from '../../../utils/routing.js';
+import { escape, extract_frontmatter, transform } from './markdown.js';
+import { replace_placeholders } from './render.js';
+// import { modules } from './type-info.js';
 
 const snippet_cache = fileURLToPath(new URL('../../../../.snippets', import.meta.url));
 if (!fs.existsSync(snippet_cache)) {
@@ -32,30 +32,30 @@ const languages = {
 	'': ''
 };
 
-const base = '../../documentation';
+const base = './documentation';
 
-const type_regex = new RegExp(
-	`(import\\(&apos;@sveltejs\\/kit&apos;\\)\\.)?\\b(${modules
-		.flatMap((module) => module.types)
-		.map((type) => type.name)
-		.join('|')})\\b`,
-	'g'
-);
+// const type_regex = new RegExp(
+// 	`(import\\(&apos;@sveltejs\\/kit&apos;\\)\\.)?\\b(${modules
+// 		.flatMap((module) => module.types)
+// 		.map((type) => type.name)
+// 		.join('|')})\\b`,
+// 	'g'
+// );
 
-const type_links = new Map();
+// const type_links = new Map();
 
-const slugs = {
-	'@sveltejs/kit': 'public-types'
-};
+// const slugs = {
+// 	'@sveltejs/kit': 'public-types'
+// };
 
-modules.forEach((module) => {
-	const slug = slugs[module.name] || slugify(module.name);
+// modules.forEach((module) => {
+// 	const slug = slugs[module.name] || slugify(module.name);
 
-	module.types.forEach((type) => {
-		const link = `/docs/types#${slug}-${slugify(type.name)}`;
-		type_links.set(type.name, link);
-	});
-});
+// 	module.types.forEach((type) => {
+// 		const link = `/docs/types#${slug}-${slugify(type.name)}`;
+// 		type_links.set(type.name, link);
+// 	});
+// });
 
 /** @param {string} html */
 function replace_blank_lines(html) {
@@ -282,18 +282,18 @@ export async function read_file(file) {
 				html = html.replace(/class=('|")/, `class=$1${version_class} `);
 			}
 
-			type_regex.lastIndex = 0;
+			// type_regex.lastIndex = 0;
 
 			html = html
-				.replace(type_regex, (match, prefix, name) => {
-					if (options.link === 'false' || name === current) {
-						// we don't want e.g. RequestHandler to link to RequestHandler
-						return match;
-					}
+				// .replace(type_regex, (match, prefix, name) => {
+				// 	if (options.link === 'false' || name === current) {
+				// 		// we don't want e.g. RequestHandler to link to RequestHandler
+				// 		return match;
+				// 	}
 
-					const link = `<a href="${type_links.get(name)}">${name}</a>`;
-					return `${prefix || ''}${link}`;
-				})
+				// 	const link = `<a href="${type_links.get(name)}">${name}</a>`;
+				// 	return `${prefix || ''}${link}`;
+				// })
 				.replace(
 					/^(\s+)<span class="token comment">([\s\S]+?)<\/span>\n/gm,
 					(match, intro_whitespace, content) => {
@@ -304,9 +304,8 @@ export async function read_file(file) {
 								const match = /^(\s*)(.*)/.exec(line);
 								const indent = (match[1] ?? '').replace(/\t/g, '  ').length;
 
-								return `<span class="token comment wrapped" style="--indent: ${indent}ch">${
-									line ?? ''
-								}</span>`;
+								return `<span class="token comment wrapped" style="--indent: ${indent}ch">${line ?? ''
+									}</span>`;
 							})
 							.join('');
 					}
@@ -319,10 +318,7 @@ export async function read_file(file) {
 		codespan: (text) => {
 			return (
 				'<code>' +
-				dynamic_extensions(text).replace(type_regex, (match, prefix, name) => {
-					const link = `<a href="${type_links.get(name)}">${name}</a>`;
-					return `${prefix || ''}${link}`;
-				}) +
+				text +
 				'</code>'
 			);
 		}
@@ -513,9 +509,9 @@ function convert_to_ts(js_code, indent = '', offset = '') {
 						if (ts.isFunctionDeclaration(node)) {
 							const is_export =
 								ts.canHaveModifiers(node) &&
-								ts
-									.getModifiers(node)
-									?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
+									ts
+										.getModifiers(node)
+										?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
 									? 'export '
 									: '';
 							const is_async =
@@ -526,8 +522,7 @@ function convert_to_ts(js_code, indent = '', offset = '') {
 							code.overwrite(
 								node.getStart(),
 								node.name.getEnd(),
-								`${is_export ? 'export ' : ''}const ${node.name.getText()} = (${
-									is_async ? 'async ' : ''
+								`${is_export ? 'export ' : ''}const ${node.name.getText()} = (${is_async ? 'async ' : ''
 								}`
 							);
 							code.appendLeft(node.body.getStart(), '=> ');
@@ -590,8 +585,8 @@ function convert_to_ts(js_code, indent = '', offset = '') {
 			js_code.includes('---cut---')
 				? js_code.indexOf('\n', js_code.indexOf('---cut---')) + 1
 				: js_code.includes('/// file:')
-				? js_code.indexOf('\n', js_code.indexOf('/// file:')) + 1
-				: 0
+					? js_code.indexOf('\n', js_code.indexOf('/// file:')) + 1
+					: 0
 		);
 		code.appendLeft(insertion_point, offset + import_statements + '\n');
 	}

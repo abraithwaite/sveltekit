@@ -4,7 +4,7 @@ import { extract_frontmatter } from '$lib/docs/server/markdown';
 
 export const prerender = true;
 
-const base_dir = '../../documentation/docs';
+const base_dir = './documentation/docs';
 const pattern = /^\d\d-/;
 
 /** @type {import('./$types').LayoutServerLoad} */

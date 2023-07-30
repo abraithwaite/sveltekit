@@ -1,99 +1,99 @@
-import { modules } from './type-info.js';
+// import { modules } from './type-info.js';
 
 /** @param {string} content */
 export function replace_placeholders(content) {
 	return content
-		.replace(/> EXPANDED_TYPES: (.+?)#(.+)$/gm, (_, name, id) => {
-			const module = modules.find((module) => module.name === name);
-			if (!module) throw new Error(`Could not find module ${name}`);
+		// .replace(/> EXPANDED_TYPES: (.+?)#(.+)$/gm, (_, name, id) => {
+		// 	const module = modules.find((module) => module.name === name);
+		// 	if (!module) throw new Error(`Could not find module ${name}`);
 
-			const type = module.types.find((t) => t.name === id);
+		// 	const type = module.types.find((t) => t.name === id);
 
-			return (
-				type.comment +
-				type.children
-					.map((child) => {
-						let section = `### ${child.name}`;
+		// 	return (
+		// 		type.comment +
+		// 		type.children
+		// 			.map((child) => {
+		// 				let section = `### ${child.name}`;
 
-						if (child.bullets) {
-							section += `\n\n<div class="ts-block-property-bullets">\n\n${child.bullets.join(
-								'\n'
-							)}\n\n</div>`;
-						}
+		// 				if (child.bullets) {
+		// 					section += `\n\n<div class="ts-block-property-bullets">\n\n${child.bullets.join(
+		// 						'\n'
+		// 					)}\n\n</div>`;
+		// 				}
 
-						section += `\n\n${child.comment}`;
+		// 				section += `\n\n${child.comment}`;
 
-						if (child.children) {
-							section += `\n\n<div class="ts-block-property-children">\n\n${child.children
-								.map(stringify)
-								.join('\n')}\n\n</div>`;
-						}
+		// 				if (child.children) {
+		// 					section += `\n\n<div class="ts-block-property-children">\n\n${child.children
+		// 						.map(stringify)
+		// 						.join('\n')}\n\n</div>`;
+		// 				}
 
-						return section;
-					})
-					.join('\n\n')
-			);
-		})
-		.replace(/> TYPES: (.+?)(?:#(.+))?$/gm, (_, name, id) => {
-			const module = modules.find((module) => module.name === name);
-			if (!module) throw new Error(`Could not find module ${name}`);
+		// 				return section;
+		// 			})
+		// 			.join('\n\n')
+		// 	);
+		// })
+		// .replace(/> TYPES: (.+?)(?:#(.+))?$/gm, (_, name, id) => {
+		// 	const module = modules.find((module) => module.name === name);
+		// 	if (!module) throw new Error(`Could not find module ${name}`);
 
-			if (id) {
-				const type = module.types.find((t) => t.name === id);
+		// 	if (id) {
+		// 		const type = module.types.find((t) => t.name === id);
 
-				return (
-					`<div class="ts-block">${fence(type.snippet)}` +
-					type.children.map(stringify).join('\n\n') +
-					`</div>`
-				);
-			}
+		// 		return (
+		// 			`<div class="ts-block">${fence(type.snippet)}` +
+		// 			type.children.map(stringify).join('\n\n') +
+		// 			`</div>`
+		// 		);
+		// 	}
 
-			return `${module.comment}\n\n${module.types
-				.map((t) => {
-					let children = t.children.map(stringify).join('\n\n');
-					if (t.name === 'Config' || t.name === 'KitConfig') {
-						// special case — we want these to be on a separate page
-						children =
-							'<div class="ts-block-property-details">\n\nSee the [configuration reference](/docs/configuration) for details.</div>';
-					}
+		// 	return `${module.comment}\n\n${module.types
+		// 		.map((t) => {
+		// 			let children = t.children.map(stringify).join('\n\n');
+		// 			if (t.name === 'Config' || t.name === 'KitConfig') {
+		// 				// special case — we want these to be on a separate page
+		// 				children =
+		// 					'<div class="ts-block-property-details">\n\nSee the [configuration reference](/docs/configuration) for details.</div>';
+		// 			}
 
-					const markdown = `<div class="ts-block">${fence(t.snippet)}` + children + `</div>`;
-					return `### ${t.name}\n\n${t.comment}\n\n${markdown}\n\n`;
-				})
-				.join('')}`;
-		})
-		.replace('> MODULES', () => {
-			return modules
-				.map((module) => {
-					if (module.exports.length === 0 && !module.exempt) return '';
-					if (module.name === 'Private types') return;
+		// 			const markdown = `<div class="ts-block">${fence(t.snippet)}` + children + `</div>`;
+		// 			return `### ${t.name}\n\n${t.comment}\n\n${markdown}\n\n`;
+		// 		})
+		// 		.join('')}`;
+		// })
+		// .replace('> MODULES', () => {
+		// 	return modules
+		// 		.map((module) => {
+		// 			if (module.exports.length === 0 && !module.exempt) return '';
+		// 			if (module.name === 'Private types') return;
 
-					let import_block = '';
+		// 			let import_block = '';
 
-					if (module.exports.length > 0) {
-						// deduplication is necessary for now, because of `error()` overload
-						const exports = Array.from(new Set(module.exports.map((x) => x.name)));
+		// 			if (module.exports.length > 0) {
+		// 				// deduplication is necessary for now, because of `error()` overload
+		// 				const exports = Array.from(new Set(module.exports.map((x) => x.name)));
 
-						let declaration = `import { ${exports.join(', ')} } from '${module.name}';`;
-						if (declaration.length > 80) {
-							declaration = `import {\n\t${exports.join(',\n\t')}\n} from '${module.name}';`;
-						}
+		// 				let declaration = `import { ${exports.join(', ')} } from '${module.name}';`;
+		// 				if (declaration.length > 80) {
+		// 					declaration = `import {\n\t${exports.join(',\n\t')}\n} from '${module.name}';`;
+		// 				}
 
-						import_block = fence(declaration, 'js');
-					}
+		// 				import_block = fence(declaration, 'js');
+		// 			}
 
-					return `## ${module.name}\n\n${import_block}\n\n${module.comment}\n\n${module.exports
-						.map((type) => {
-							const markdown =
-								`<div class="ts-block">${fence(type.snippet)}` +
-								type.children.map(stringify).join('\n\n') +
-								`</div>`;
-							return `### ${type.name}\n\n${type.comment}\n\n${markdown}`;
-						})
-						.join('\n\n')}`;
-				})
-				.join('\n\n');
-		});
+		// 			return `## ${module.name}\n\n${import_block}\n\n${module.comment}\n\n${module.exports
+		// 				.map((type) => {
+		// 					const markdown =
+		// 						`<div class="ts-block">${fence(type.snippet)}` +
+		// 						type.children.map(stringify).join('\n\n') +
+		// 						`</div>`;
+		// 					return `### ${type.name}\n\n${type.comment}\n\n${markdown}`;
+		// 				})
+		// 				.join('\n\n')}`;
+		// 		})
+		// 		.join('\n\n');
+		// });
 }
 
 /**
